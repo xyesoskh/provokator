@@ -1,38 +1,34 @@
-# -*- coding: utf-8 -*-
 # meta developer: @lomkapd
 # meta name: Provokator
-# meta desc: Auto send random text from templates file
+# meta desc: Auto send random text from templates
 
 from .. import loader, utils
 import random
 import asyncio
-import os
 
 @loader.tds
 class Provokator(loader.Module):
-    """Auto send random text from file"""
+    """Auto send random text from templates"""
 
     strings = {
         "name": "Provokator",
         "started": "Started with interval {} sec.",
         "stopped": "Stopped.",
-        "nofile": "templates.txt not found!",
-        "empty": "Templates file is empty!",
+        "empty": "Templates are empty!",
     }
 
     def __init__(self):
         self.running = False
         self.task = None
-        self.templates = []
-
-    async def client_ready(self, client, db):
-        path = os.path.join(os.path.dirname(__file__), "templates.txt")
-
-        if not os.path.exists(path):
-            return
-
-        with open(path, "r", encoding="utf-8") as f:
-            self.templates = [line.strip() for line in f if line.strip()]
+        # 🔹 Шаблоны вписаны прямо сюда
+        self.templates = [
+            "Hello",
+            "How are you?",
+            "Anyone here?",
+            "Let's chat",
+            "Provoking message #1",
+            "Provoking message #2"
+        ]
 
     @loader.command()
     async def provstart(self, message):
