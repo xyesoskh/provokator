@@ -1,5 +1,5 @@
 # meta developer: @lomkapd
-# meta name: provokator
+# meta name: Provokator
 # meta desc: Автоотправка случайного текста из файла шаблонов
 
 from .. import loader, utils
@@ -8,11 +8,11 @@ import asyncio
 import os
 
 @loader.tds
-class provokator(loader.Module):
+class Provokator(loader.Module):
     """Автоотправка случайного текста из файла"""
 
     strings = {
-        "name": "RandomAutoText",
+        "name": "Provokator",
         "started": "▶️ Запущено с интервалом {} сек.",
         "stopped": "⏹ Остановлено.",
         "nofile": "❌ Файл templates.txt не найден!",
@@ -25,7 +25,6 @@ class provokator(loader.Module):
         self.templates = []
 
     async def client_ready(self, client, db):
-        # путь к файлу рядом с модулем
         path = os.path.join(os.path.dirname(__file__), "templates.txt")
 
         if not os.path.exists(path):
@@ -35,12 +34,12 @@ class provokator(loader.Module):
             self.templates = [line.strip() for line in f if line.strip()]
 
     @loader.command()
-    async def prov(self, message):
-        """Запуск автоотправки. Использование: .startrand <секунды>"""
+    async def provstart(self, message):
+        """Запуск автоотправки. Использование: .provstart <секунды>"""
         args = utils.get_args_raw(message)
 
         if not args.isdigit():
-            await utils.answer(message, "❌ Укажи интервал в секундах. Пример: .startrand 10")
+            await utils.answer(message, "❌ Укажи интервал в секундах. Пример: .provstart 10")
             return
 
         if not self.templates:
@@ -65,7 +64,7 @@ class provokator(loader.Module):
         await utils.answer(message, self.strings["started"].format(interval))
 
     @loader.command()
-    async def prov(self, message):
+    async def provstop(self, message):
         """Остановить автоотправку"""
         self.running = False
         if self.task:
