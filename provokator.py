@@ -1,26 +1,16 @@
-# meta developer: @lomkapd
-# meta name: Provokator
-# meta desc: Auto send random text from templates
-
 from .. import loader, utils
-import random
-import asyncio
+import random, asyncio
 
 @loader.tds
 class Provokator(loader.Module):
-    """Auto send random text from templates"""
-
-    strings = {
-        "name": "Provokator",
-        "started": "Started with interval {} sec.",
-        "stopped": "Stopped.",
-        "empty": "Templates are empty!",
-    }
+    """Простой модуль для отправки шаблонов по таймеру"""
+    strings = {"name": "Provokator"}
 
     def __init__(self):
         self.running = False
         self.task = None
-        # 🔹 Шаблоны вписаны прямо сюда
+
+        # Вставь сюда весь твой текст, тройные кавычки позволяют использовать многострочный текст
         raw_text = """это же твоя мама там за колеты пиздиться?
  у меня за место грузика на мышке зубы твоего папы стоят
  мне че к тебе домой с мылом придти и язык тебе намылить или че 
@@ -399,44 +389,39 @@ class Provokator(loader.Module):
  сельчанка ебаная
  я тебя вместо трусов щас одену 
  иди нахуй говорю пока я твое пузо толстое не нашинковал
- слыш у меня член подкосила прям те в харю"""
+ слыш у меня член подкосила прям те в харю
+"""
 
-    self.template = [line.strips() for line in raw_text.splitlines() if line.strips()]
+        # Разбиваем текст на строки и удаляем пустые
+        self.templates = [line.strip() for line in raw_text.splitlines() if line.strip()]
+
     @loader.command()
     async def provstart(self, message):
-        """Start auto sending. Usage: .provstart <seconds>"""
+        """Запуск рассылки шаблонов с указанным интервалом: .provstart 5"""
         args = utils.get_args_raw(message)
-
         if not args.isdigit():
-            await utils.answer(message, "Provide interval in seconds. Example: .provstart 10")
-            return
-
-        if not self.templates:
-            await utils.answer(message, self.strings["empty"])
+            await utils.answer(message, "Укажи интервал в секундах")
             return
 
         interval = int(args)
-
-        if self.running:
-            await utils.answer(message, "Already running.")
-            return
-
         self.running = True
 
         async def loop():
             while self.running:
-                text = random.choice(self.templates)
-                await message.client.send_message(message.chat_id, text)
+                await message.client.send_message(
+                    message.chat_id,
+                    random.choice(self.templates)
+                )
                 await asyncio.sleep(interval)
 
         self.task = asyncio.create_task(loop())
-        await utils.answer(message, self.strings["started"].format(interval))
+        await utils.answer(message, f"Запущено: {interval} сек.")
 
     @loader.command()
     async def provstop(self, message):
-        """Stop auto sending"""
+        """Остановка рассылки шаблонов"""
         self.running = False
         if self.task:
             self.task.cancel()
             self.task = None
-        await utils.answer(message, self.strings["stopped"])
+        await utils.answer(message, "Остановлено")
